@@ -664,6 +664,27 @@ function Wallet ($http, $window, $timeout, $location, $injector, Alerts, MyWalle
     return result;
   };
 
+  wallet.parseBitcoinURL = (destinations) => {
+    if (destinations.length === 0) return;
+    function extractFromUri (URI) {
+      let result = {};
+      const addressRegex = /(?=\:)(.*)(?=\?)/;
+      const amountRegex = /(?=amount=)(.*)(?=&message)/;
+      const noteRegex = /(?=&message=)(.*)/;
+      const addressSlice = 1;
+      const amountSlice = 7;
+      const noteSlice = 9;
+      const address = URI.match(addressRegex)[0];
+      result['address'] = address.slice(addressSlice, address.length);
+      const amount = URI.match(amountRegex)[0];
+      result['amount'] = parseFloat(amount.slice(amountSlice, amount.length)) * 100000000;
+      const note = URI.match(noteRegex)[0];
+      result['note'] = decodeURI(note.slice(noteSlice, note.length));
+      return result;
+    }
+    return extractFromUri(destinations[0].address);
+  };
+
   wallet.isSynchronizedWithServer = () =>
     wallet.store.isSynchronizedWithServer();
 
